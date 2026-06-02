@@ -35,6 +35,9 @@ _LEASE_COLUMNS = [
     "comment",
 ]
 
+# Table frames rendered at 30% grey so borders recede behind the content.
+_BORDER_STYLE = "grey30"
+
 _STATUS_COLOUR = {"ok": "green", "warn": "yellow", "fail": "red"}
 _VERDICT = {
     "ok": "[green]all checks passed[/green]",
@@ -87,7 +90,13 @@ class RichRenderer(Renderer):
     def _kv_panel(
         self, title: str, data: dict[str, Any], *, keys: Sequence[str] | None = None
     ) -> None:
-        table = Table(show_header=False, box=None, title=title, title_style="bold cyan")
+        table = Table(
+            show_header=False,
+            box=None,
+            title=title,
+            title_style="bold cyan",
+            title_justify="left",
+        )
         table.add_column("key", style="cyan", no_wrap=True)
         table.add_column("value", style="white")
         items = (
@@ -114,7 +123,7 @@ class RichRenderer(Renderer):
         self._console.print()
 
     def doctor(self, payload: dict[str, Any]) -> None:
-        table = Table(title="mikrot doctor", title_justify="left")
+        table = Table(title="mikrot doctor", title_justify="left", border_style=_BORDER_STYLE)
         table.add_column("check")
         table.add_column("status")
         table.add_column("detail")
@@ -144,7 +153,11 @@ class RichRenderer(Renderer):
             )
             self._console.print()
             return
-        table = Table(title=f"dhcp-server/lease  (total={total}, shown={len(leases)})")
+        table = Table(
+            title=f"dhcp-server/lease  (total={total}, shown={len(leases)})",
+            title_justify="left",
+            border_style=_BORDER_STYLE,
+        )
         for column in _LEASE_COLUMNS:
             table.add_column(column)
         for lease in leases:

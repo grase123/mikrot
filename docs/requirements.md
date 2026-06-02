@@ -55,8 +55,9 @@ it exit 1 when `overall_status != "ok"`.
 
 ### 3.2. `mikrot dhcp-leases [--mac SUB] [--name SUB] [--status S]`
 
-Leases from `/ip/dhcp-server/lease`. Filters: MAC substring (case-insensitive),
-host-name substring, exact `status`. Sort: `status` ascending, then IP ascending.
+Leases from `/ip/dhcp-server/lease`. Filters: MAC substring (case- and separator-insensitive
+-- `:`/`-`/none all match), host-name substring, comment substring, exact `status`. Sort:
+`status` ascending, then IP ascending.
 
 - Rich: a 10-column table (`address | active-address | mac-address | host-name |
   status | dynamic | expires-after | last-seen | server | comment`); `waiting` rows are

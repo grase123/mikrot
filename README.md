@@ -16,7 +16,7 @@ provided in a **lightweight** form.
 | Command | Purpose |
 | --- | --- |
 | `mikrot doctor` | Connection diagnostics (ok/warn/fail + `overall_status`) + baseline router info (identity / resource / routerboard). |
-| `mikrot dhcp-leases` | List DHCP leases (`/ip/dhcp-server/lease`) with `--mac` / `--name` / `--status` filters. |
+| `mikrot dhcp-leases` | List DHCP leases (`/ip/dhcp-server/lease`) with `--mac` / `--name` / `--status` / `--comment` filters. |
 | `mikrot make-static <ip>` | Convert a dynamic lease into a static reservation (dry-run by default; `--commit` applies). |
 | `mikrot make-dynamic <ip>` | The reverse operation via `DELETE` (dry-run by default; `--commit` applies). |
 | `mikrot manifest` | Machine-readable self-description of the CLI for AI (`--json`). |
@@ -143,6 +143,7 @@ mikrot doctor --strict                   # exit 1 if overall_status != ok
 
 mikrot dhcp-leases                       # all leases (Rich table; waiting dimmed)
 mikrot dhcp-leases --mac DC:2C:6E        # filter by MAC prefix (vendor OUI)
+mikrot dhcp-leases --comment printer     # filter by comment substring
 mikrot dhcp-leases --status bound        # online clients only
 mikrot --json dhcp-leases                # full lease (~19 fields) per record
 
