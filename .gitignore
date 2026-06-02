@@ -1,0 +1,52 @@
+# Python / UV
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# uv.lock IS committed (kept under VCS for reproducibility).
+
+# Local environment overrides -- MIKROT_PASSWORD etc. live here.
+.env
+.env.local
+*.local.json
+
+# Local Claude files (per-project memory + scratch are NOT committed;
+# .claude/README.md is).
+.claude/memory/
+.claude/scratch/
+.claude/README.md
+
+CLAUDE.local.md
+
+# IDE / OS
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# exclude other temporary files
+*.log
+*.tmp
+*.temp
+
+
+# exclude docs in different languages
+*_rus.md
+
+# exclude references files
+docs/refs
+
+# exclude files related to tasks
+docs/tasks
+

@@ -1,0 +1,61 @@
+[project]
+name = "mikrot"
+version = "0.1.0"
+description = "MikroTik RouterOS REST helper CLI (mikrot)."
+authors = [
+    { name = "Sergey Grankin" },
+]
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+
+dependencies = [
+    "pydantic>=2.7",
+    "pydantic-settings>=2.2",
+    "typer>=0.12",
+    "rich>=13.7",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+mikrot = "mikrot.app:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mikrot"]
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "RUF"]
+
+[tool.pyright]
+# Point Pylance / pyright at the project's uv-managed venv so editor imports
+# (typer, httpx, ...) resolve without manual interpreter setup.
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+include = ["src", "tests"]
+exclude = ["**/__pycache__", ".venv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
