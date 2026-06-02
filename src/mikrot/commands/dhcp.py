@@ -37,6 +37,7 @@ def _lease_matches(
     name: str | None,
     status: str | None,
     comment: str | None,
+    address: str | None,
 ) -> bool:
     """Pure filter for a single lease (substring filters are case-insensitive)."""
     if mac and _normalize_mac(mac) not in _normalize_mac(str(lease.get("mac-address", ""))):
@@ -47,6 +48,12 @@ def _lease_matches(
         return False
     if comment and comment.lower() not in str(lease.get("comment", "")).lower():
         return False
+    if address:
+        needle = address.lower()
+        in_address = needle in str(lease.get("address", "")).lower()
+        in_active = needle in str(lease.get("active-address", "")).lower()
+        if not (in_address or in_active):
+            return False
     return True
 
 
@@ -58,6 +65,7 @@ def register(app: typer.Typer) -> None:
             "Examples: `mikrot dhcp-leases`, `mikrot l --status bound` (alias), "
             "`mikrot dhcp-leases --mac DC:2C:6E` (filter by vendor OUI), "
             "`mikrot dhcp-leases --comment printer`, "
+            "`mikrot dhcp-leases -a 192.168.88` (IP substring), "
             "`mikrot --json dhcp-leases --status bound`."
         ),
     )
@@ -66,16 +74,29 @@ def register(app: typer.Typer) -> None:
         mac: str | None = typer.Option(
             None,
             "--mac",
+            "-m",
             help="Filter by MAC substring; ':'/'-'/no separator all match (case-insensitive).",
         ),
         name: str | None = typer.Option(
-            None, "--name", help="Filter by host-name substring (case-insensitive)."
+            None,
+            "--name",
+            "--host",
+            "-n",
+            help="Filter by host-name substring (case-insensitive).",
         ),
         status: str | None = typer.Option(
-            None, "--status", help="Filter by exact lease status (e.g. bound, waiting)."
+            None, "--status", "-s", help="Filter by exact lease status (e.g. bound, waiting)."
         ),
         comment: str | None = typer.Option(
-            None, "--comment", help="Filter by comment substring (case-insensitive)."
+            None, "--comment", "-c", help="Filter by comment substring (case-insensitive)."
+        ),
+        address: str | None = typer.Option(
+            None,
+            "--address",
+            "--ip",
+            "-a",
+            "-i",
+            help="Filter by IP substring; matches address or active-address.",
         ),
     ) -> None:
         with emit_errors(ctx) as cli_ctx:
@@ -87,7 +108,9 @@ def register(app: typer.Typer) -> None:
             filtered = [
                 item
                 for item in leases
-                if _lease_matches(item, mac=mac, name=name, status=status, comment=comment)
+                if _lease_matches(
+                    item, mac=mac, name=name, status=status, comment=comment, address=address
+                )
             ]
             filtered.sort(
                 key=lambda x: (str(x.get("status", "")), _ip_sort_key(str(x.get("address", ""))))

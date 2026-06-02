@@ -34,7 +34,8 @@ the code targets any platform with Python 3.12.
 ## 3. Commands
 
 Every command supports two output modes: Rich (default) and `--json` (a global flag
-accepted both before and after the subcommand).
+accepted both before and after the subcommand). Help is available via `-h` / `--help` at
+every level.
 
 ### 3.1. `mikrot doctor [--strict]`
 
@@ -53,11 +54,13 @@ unreachable, the baseline is skipped without error.
 `doctor` is **errors-as-data**: it exits 0 on any outcome by default; `--strict` makes
 it exit 1 when `overall_status != "ok"`.
 
-### 3.2. `mikrot dhcp-leases [--mac SUB] [--name SUB] [--status S] [--comment SUB]`
+### 3.2. `mikrot dhcp-leases [--mac SUB] [--name SUB] [--status S] [--comment SUB] [--address SUB]`
 
-Leases from `/ip/dhcp-server/lease`. Filters: MAC substring (case- and separator-insensitive
--- `:`/`-`/none all match), host-name substring, comment substring, exact `status`. Sort:
-`status` ascending, then IP ascending.
+Leases from `/ip/dhcp-server/lease`. Filters: MAC substring via `--mac`/`-m` (case- and
+separator-insensitive -- `:`/`-`/none all match), host-name substring via `--name` (aliases
+`--host`/`-n`), comment substring via `--comment`/`-c`, IP substring via `--address`
+(aliases `--ip`/`-a`/`-i`; matches `address` or `active-address`), exact `status` via
+`--status`/`-s`. Sort: `status` ascending, then IP ascending.
 
 - Rich: a 10-column table (`address | active-address | mac-address | host-name |
   status | dynamic | expires-after | last-seen | server | comment`); `waiting` rows are

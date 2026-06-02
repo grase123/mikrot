@@ -76,6 +76,7 @@ app = typer.Typer(
     add_completion=False,
     rich_markup_mode="rich",
     cls=AliasGroup,
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 
 doctor_cmd.register(app)

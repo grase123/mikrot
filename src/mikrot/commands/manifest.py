@@ -118,7 +118,7 @@ _COMMANDS: list[dict[str, Any]] = [
         "path": ["dhcp-leases"],
         "summary": (
             "List DHCP leases (full objects in --json). "
-            "Filters: --mac / --name / --status / --comment."
+            "Filters: --mac / --name / --status / --comment / --address."
         ),
         "response_shape": {
             "kind": "list",
