@@ -14,8 +14,8 @@ from typing import Any
 
 # Stable codes published by `mikrot manifest`. Tiers (comment-only, no
 # separate registry): infrastructure -> router_unreachable / http_error /
-# config_missing / unknown; command-level -> lease_not_found /
-# lease_ambiguous.
+# config_missing / secret_resolution_failed / unknown; command-level ->
+# lease_not_found / lease_ambiguous.
 ERROR_CODES: frozenset[str] = frozenset(
     {
         "router_unreachable",
@@ -23,6 +23,7 @@ ERROR_CODES: frozenset[str] = frozenset(
         "lease_not_found",
         "lease_ambiguous",
         "config_missing",
+        "secret_resolution_failed",
         "unknown",
     }
 )
@@ -35,6 +36,7 @@ _EXIT_CODES: dict[str, int] = {
     "lease_not_found": 3,
     "lease_ambiguous": 4,
     "config_missing": 1,
+    "secret_resolution_failed": 1,
     "unknown": 1,
 }
 

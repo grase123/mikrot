@@ -93,6 +93,10 @@ def test_error_shape_matches_envelope() -> None:
     assert set(manifest["error_shape"]["fields"]) == set(envelope)
 
 
+def test_secret_resolution_failed_is_infrastructure() -> None:
+    assert "secret_resolution_failed" in build_manifest()["infrastructure_errors"]
+
+
 def test_exit_codes_cover_registered_codes() -> None:
     # The published code->exit map must cover exactly the registered codes and
     # mirror the single source of truth (errors._EXIT_CODES).

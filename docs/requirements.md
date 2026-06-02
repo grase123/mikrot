@@ -118,6 +118,17 @@ in `.env` (copy `.env.example`). Only `MIKROT_PASSWORD` is mandatory: it is requ
 use time (`load_settings`), but `doctor` builds settings tolerantly and reports a missing
 password as a `fail` row instead of crashing.
 
+**Secret references.** Any `MIKROT_*` value may be a secret reference like
+`op://Vault/Item/field` instead of a literal. After the `.env` files load (and before
+`Settings` reads the environment), such references are resolved in-process by shelling out
+to the matching CLI (1Password's `op read`), via the self-contained `secretref` package.
+Resolution is value-driven -- only reference-shaped values are touched; the tool's presence
+is checked first (`shutil.which`); a literal value is used as-is (backward compatible). A
+failure surfaces as `code="secret_resolution_failed"`. Extra providers (other managers) can
+be registered without code via the `SECRETREF_PROVIDERS` env var (a JSON array). A built-in
+`env://${VAR:-default}` reference resolves environment variables in-process (an example
+custom provider). See `src/mikrot/secretref/README.md` and DEC-012.
+
 ## 5. AI-friendly layer (lightweight)
 
 Deliberately lightweight, because the project is small and simple for an AI to drive.
@@ -233,6 +244,7 @@ The error envelope carries a `code`; each code maps to a process exit code.
 | `lease_not_found` | 3 | command | `make-*`: no lease with that IP |
 | `lease_ambiguous` | 4 | command | `make-*`: more than one lease with that IP |
 | `config_missing` | 1 | infrastructure | `MIKROT_PASSWORD` not set |
+| `secret_resolution_failed` | 1 | infrastructure | a secret reference (e.g. `op://...`) could not be resolved |
 | `unknown` | 1 | infrastructure | uncategorised path |
 
 `doctor` is excluded from this scheme: it always exits 0 (errors-as-data), `--strict` ->

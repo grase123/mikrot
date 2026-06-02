@@ -23,12 +23,31 @@ uv tool install <repo-or-url>
 uv tool update-shell                 # once; then restart the terminal
 mikrot --version
 
-# Dev (editable, from the repository):
+# Dev (from the repository):
 git clone <repo-url> mikrot
 cd mikrot
-uv sync --extra dev
+uv sync --extra dev                  # venv for tests/lint and `uv run`
 uv run mikrot --version
+
+# Run `mikrot` directly (no `uv run`) -- editable OS-level install:
+uv tool install --editable .         # links the source; picks up your edits
+uv tool update-shell                 # once; then restart the terminal
+mikrot --version
 ```
+
+### Settings from the cloned repo
+
+mikrot finds the nearest `.env` by walking up from the current directory. Create the repo's
+`.env` once:
+
+```pwsh
+Copy-Item .env.example .env          # then set MIKROT_PASSWORD
+```
+
+Any `mikrot` run from inside the cloned repo (or a subdirectory) then uses that `.env` --
+even with the OS-level install, because discovery is based on the working directory, not on
+where the tool is installed. Run it from elsewhere and it falls back to the global
+`~/.config/mikrot/.env` and the shell environment (see [Configuration](#configuration)).
 
 ## Configuration
 
@@ -85,6 +104,30 @@ To start from a template, copy the repo's example into a project-local `.env`:
 ```pwsh
 Copy-Item .env.example .env          # then set MIKROT_PASSWORD
 ```
+
+### Secrets from 1Password (`op://` references)
+
+Instead of a literal password, any `MIKROT_*` value may be a 1Password **secret
+reference**:
+
+```
+MIKROT_PASSWORD=op://Vault/MikroTik/password
+```
+
+On startup mikrot resolves such references with the 1Password CLI (`op read`), so the
+secret never lives in a file. Requirements:
+
+- the `op` CLI is installed and on `PATH`;
+- you are signed in -- interactively (1Password desktop app integration), or for
+  headless/CI via a service-account token in `OP_SERVICE_ACCOUNT_TOKEN` (read by `op`).
+
+Only reference-shaped values are touched; a literal value still works unchanged. If `op`
+is missing or a reference cannot be resolved, the command fails with
+`code="secret_resolution_failed"`.
+
+More password managers can be added without code via the `SECRETREF_PROVIDERS` env var (a
+JSON array of providers). A built-in `env://${VAR:-default}` reference resolves environment
+variables in-process. See [`src/mikrot/secretref/README.md`](src/mikrot/secretref/README.md).
 
 ## Examples
 

@@ -9,12 +9,14 @@ without ever touching the developer's home or the repo's real ``.env``.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
 
 import mikrot.settings as settings_mod
 from mikrot.errors import MikrotError
+from mikrot.secretref import SecretResolutionError
 from mikrot.settings import Settings, load_settings
 
 # Captured before conftest's autouse fixture patches the module attribute.
@@ -129,3 +131,31 @@ def test_global_used_when_no_cwd_env(
     monkeypatch.delenv("MIKROT_HOST", raising=False)
     _REAL_LOAD_ENV()
     assert Settings().host == "globalhost"
+
+
+# --- secret references (secretref / op://) ---
+
+
+def test_secret_ref_resolved_into_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MIKROT_PASSWORD", "op://V/I/field")
+    monkeypatch.setattr(
+        settings_mod,
+        "resolve_mapping",
+        lambda mapping: {**mapping, "MIKROT_PASSWORD": "resolved-secret"},
+    )
+    settings_mod._resolve_secret_refs()
+    assert os.environ["MIKROT_PASSWORD"] == "resolved-secret"
+
+
+def test_secret_ref_failure_becomes_mikrot_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MIKROT_PASSWORD", "op://V/I/field")
+
+    def _boom(_mapping: dict[str, str]) -> dict[str, str]:
+        raise SecretResolutionError("nope", ref="op://V/I/field", tool="op")
+
+    monkeypatch.setattr(settings_mod, "resolve_mapping", _boom)
+    with pytest.raises(MikrotError) as excinfo:
+        settings_mod._resolve_secret_refs()
+    assert excinfo.value.code == "secret_resolution_failed"
+    assert excinfo.value.exit_code == 1
+    assert excinfo.value.context["ref"] == "op://V/I/field"

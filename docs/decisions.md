@@ -150,3 +150,47 @@ Drift guard stays light (not heavy contract machinery): tests assert every manif
 is registered, per-command codes stay domain-only, and the hand-written `fields` keys
 equal the real Pydantic `model_fields`. `Lease` (passthrough) is exempt from the field
 check.
+
+## DEC-012. Secret references via password managers (`secretref` + 1Password)
+
+**Context.** Storing `MIKROT_PASSWORD` as plaintext in `.env` is undesirable. We want to
+keep the secret in a password manager (1Password first) and reference it from config.
+
+**Decision.** Resolve secret references **in-process** (not by re-exec). A self-contained
+package `mikrot/secretref/` resolves values shaped like `op://Vault/Item/field`:
+
+- A **hardcoded prefix -> provider** map (`PREFIX_PROVIDERS`) ties a reference prefix to an
+  external CLI and its read command (1Password: prefix `op://`, tool `op`, `op read <ref>`).
+  Adding a manager is one map entry.
+- Resolution is **value-driven**: only values matching a known prefix are resolved; the
+  package needs no knowledge of which variables exist. The host (mikrot) chooses scope by
+  passing the `MIKROT_`-prefixed subset of the environment (prefix taken from
+  `Settings.model_config["env_prefix"]`).
+- The tool's presence is checked (`shutil.which`) **before** any process launch; the secret
+  is read via `subprocess` with a timeout. Non-reference values pass through unchanged
+  (backward compatible).
+- `secretref` stays host-agnostic (no imports from mikrot; its own `SecretResolutionError`).
+  The settings layer converts failures to a single errors-as-data code
+  `secret_resolution_failed` (infrastructure, exit 1; `contract_version` -> 4).
+- Extra providers can be added **without code** via the `SECRETREF_PROVIDERS` env var (a
+  JSON array of `{prefix, tool, args}`; an `{ref}` token in `args` is substituted, else the
+  reference is appended). Env-defined providers override built-ins on a prefix clash;
+  malformed config raises. It is read from the real environment only (it configures the
+  resolver, so it is never itself resolved). This is not part of the manifest contract, so
+  it does not bump `contract_version`. See `src/mikrot/secretref/README.md`.
+
+**Provider model.** Providers are polymorphic: a base `Provider` with `resolve(value)`, a
+`CliProvider` (external tool; what `SECRETREF_PROVIDERS` builds), and an `EnvProvider`
+shipped as an **example custom (internal) provider** (prefix `env://`) that resolves
+environment variables in-process. `env://${VAR:-default}` hands the expression to the
+`expandvars` library rather than re-implementing shell expansion (a small added dependency).
+Non-CLI providers are added by subclassing `Provider`.
+
+**Rejected: re-exec under `op run`.** Re-running the process under `op run` via
+`os.execvp` is unreliable on Windows (the process is not awaited and the exit code is lost
+-- CPython #101191), which would break the meaningful-exit-code contract (DEC-005) on the
+primary dev platform; `op run` also strips environment variables (e.g. `COLUMNS`/`TERM`)
+that the Rich output relies on. In-process `op read` avoids both.
+
+**Future.** `secretref` is built for later extraction into a standalone distribution.
+Caching/batching of `op read` calls is a low-priority backlog idea.

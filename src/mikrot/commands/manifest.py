@@ -30,17 +30,18 @@ from mikrot.context import CliContext
 from mikrot.errors import _EXIT_CODES
 
 # Bump on ANY change to the published contract (commands, shapes, code sets).
-CONTRACT_VERSION = 3
+CONTRACT_VERSION = 4
 
 # Codes that can surface from any command that contacts the router or loads
 # settings, via the errors-as-data envelope. Per-command `error_codes` lists
 # only DOMAIN-specific codes; a consumer takes the union of a command's
 # `error_codes` with these infrastructure codes.
 _INFRASTRUCTURE_ERRORS: list[str] = [
-    "router_unreachable",  # connect-fail -> exit 1
-    "http_error",          # HTTP status  -> exit 2
-    "config_missing",      # MIKROT_PASSWORD / .env missing -> exit 1
-    "unknown",             # uncategorised path -> exit 1
+    "router_unreachable",       # connect-fail -> exit 1
+    "http_error",               # HTTP status  -> exit 2
+    "config_missing",           # MIKROT_PASSWORD / .env missing -> exit 1
+    "secret_resolution_failed",  # op:// reference could not be resolved -> exit 1
+    "unknown",                  # uncategorised path -> exit 1
 ]
 
 # Shapes for models referenced by name (e.g. `array<CheckResult>`) but not the

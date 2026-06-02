@@ -28,6 +28,7 @@ import dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from mikrot.errors import MikrotError
+from mikrot.secretref import SecretResolutionError, resolve_mapping
 
 # Scaffold written to the global .env on first run. Every variable is commented
 # out on purpose: an all-commented file contributes no values (the built-in
@@ -122,6 +123,37 @@ def _load_env() -> None:
     if cwd_env:
         dotenv.load_dotenv(cwd_env, override=False)
     dotenv.load_dotenv(_global_env_path(), override=False)
+    _resolve_secret_refs()
+
+
+def _resolve_secret_refs() -> None:
+    """Resolve secret references (e.g. ``op://...``) in MIKROT_-prefixed env vars.
+
+    Runs after the ``.env`` files are loaded and before :class:`Settings` reads
+    the environment. Resolution is value-driven (only reference-shaped values are
+    touched, via :mod:`mikrot.secretref`); a failure surfaces as an
+    errors-as-data ``MikrotError(code="secret_resolution_failed")``.
+    """
+    prefix = Settings.model_config.get("env_prefix") or ""
+    subset = {key: val for key, val in os.environ.items() if key.startswith(prefix)}
+    if not subset:
+        return
+    try:
+        resolved = resolve_mapping(subset)
+    except SecretResolutionError as exc:
+        raise MikrotError(
+            str(exc),
+            code="secret_resolution_failed",
+            fix_description=(
+                "install and sign in to the required secret tool (e.g. 1Password "
+                "'op'), or set the value directly instead of a secret reference"
+            ),
+            context={
+                **({"ref": exc.ref} if exc.ref else {}),
+                **({"tool": exc.tool} if exc.tool else {}),
+            },
+        ) from exc
+    os.environ.update(resolved)
 
 
 def load_settings() -> Settings:
