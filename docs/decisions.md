@@ -194,3 +194,17 @@ that the Rich output relies on. In-process `op read` avoids both.
 
 **Future.** `secretref` is built for later extraction into a standalone distribution.
 Caching/batching of `op read` calls is a low-priority backlog idea.
+
+## DEC-013. Command aliases via `AliasGroup`
+
+**Context.** Short aliases for frequently typed commands are convenient (e.g. `l`/`d` for
+`dhcp-leases`). Typer has no built-in `aliases=`.
+
+**Decision.** A custom group `AliasGroup(typer.core.TyperGroup)` overrides `get_command` to
+map aliases to canonical names from a single dict `_COMMAND_ALIASES` (alias -> command), and
+is passed via `typer.Typer(cls=AliasGroup)`. Add an alias = one dict entry. Aliases are
+resolved but **not** listed as separate commands (so `--help` stays clean); they are
+advertised in the target command's help text. They are **not** published in `mikrot manifest`
+(the contract is canonical by full name), so they do not bump `contract_version`.
+`AliasGroup.get_command` is typed with `Any` because Typer vendors click as the private
+`typer._click`; coupling the override to that module would be fragile.

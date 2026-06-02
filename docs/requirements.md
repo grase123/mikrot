@@ -53,7 +53,7 @@ unreachable, the baseline is skipped without error.
 `doctor` is **errors-as-data**: it exits 0 on any outcome by default; `--strict` makes
 it exit 1 when `overall_status != "ok"`.
 
-### 3.2. `mikrot dhcp-leases [--mac SUB] [--name SUB] [--status S]`
+### 3.2. `mikrot dhcp-leases [--mac SUB] [--name SUB] [--status S] [--comment SUB]`
 
 Leases from `/ip/dhcp-server/lease`. Filters: MAC substring (case- and separator-insensitive
 -- `:`/`-`/none all match), host-name substring, comment substring, exact `status`. Sort:
@@ -64,7 +64,8 @@ Leases from `/ip/dhcp-server/lease`. Filters: MAC substring (case- and separator
   dimmed.
 - `--json`: an array of the **full** lease objects (~19 fields), not the column subset.
 
-The MAC substring filter is handy for grouping devices by vendor prefix (OUI).
+The MAC substring filter is handy for grouping devices by vendor prefix (OUI). Command
+aliases: `l`, `d` (resolved by `AliasGroup`; see DEC-013).
 
 ### 3.3. `mikrot make-static <ip> [--commit]`
 

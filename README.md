@@ -1,6 +1,6 @@
 # mikrot
 
-mikrot is a small, cross-platform Python CLI for managing MikroTik (RouterOS) routers
+**mikrot** is a small, cross-platform Python CLI for managing MikroTik (RouterOS) routers
 through their REST API. It is built to be automation- and **AI-friendly**: every command
 speaks `--json`, errors come back as structured data (stable codes with machine-actionable
 fixes), and `mikrot manifest` publishes a machine-readable self-description (commands,
@@ -16,7 +16,7 @@ provided in a **lightweight** form.
 | Command | Purpose |
 | --- | --- |
 | `mikrot doctor` | Connection diagnostics (ok/warn/fail + `overall_status`) + baseline router info (identity / resource / routerboard). |
-| `mikrot dhcp-leases` | List DHCP leases (`/ip/dhcp-server/lease`) with `--mac` / `--name` / `--status` / `--comment` filters. |
+| `mikrot dhcp-leases` | List DHCP leases (`/ip/dhcp-server/lease`) with `--mac` / `--name` / `--status` / `--comment` filters. Aliases: `l`, `d`. |
 | `mikrot make-static <ip>` | Convert a dynamic lease into a static reservation (dry-run by default; `--commit` applies). |
 | `mikrot make-dynamic <ip>` | The reverse operation via `DELETE` (dry-run by default; `--commit` applies). |
 | `mikrot manifest` | Machine-readable self-description of the CLI for AI (`--json`). |
@@ -142,6 +142,7 @@ mikrot doctor                            # preflight + baseline router info
 mikrot doctor --strict                   # exit 1 if overall_status != ok
 
 mikrot dhcp-leases                       # all leases (Rich table; waiting dimmed)
+mikrot l --status bound                  # alias for dhcp-leases (also `d`)
 mikrot dhcp-leases --mac DC:2C:6E        # MAC substring; ':' / '-' / no separator all match (e.g. vendor OUI)
 mikrot dhcp-leases --comment printer     # filter by comment substring
 mikrot dhcp-leases --status bound        # online clients only

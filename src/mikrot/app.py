@@ -8,8 +8,10 @@ of argv in :func:`main` so it may appear before or after the subcommand.
 from __future__ import annotations
 
 import sys
+from typing import Any
 
 import typer
+from typer.core import TyperGroup
 
 from mikrot._version import version_string
 from mikrot.commands import dhcp as dhcp_cmd
@@ -44,13 +46,36 @@ _ROOT_EPILOG = (
     "Full machine-readable spec: `mikrot manifest --json`."
 )
 
+# Command aliases: alias -> canonical command name. Add an entry to add an alias.
+# Aliases are resolved (so `mikrot l` runs `dhcp-leases`) but not listed as
+# separate commands, so `--help` stays clean; advertise them in the target
+# command's help text.
+_COMMAND_ALIASES = {
+    "l": "dhcp-leases",
+    "d": "dhcp-leases",
+}
+
+
+class AliasGroup(TyperGroup):
+    """Typer group that resolves command aliases from ``_COMMAND_ALIASES``."""
+
+    def get_command(self, ctx: Any, cmd_name: str) -> Any:
+        # Typer vendors click as ``typer._click``; ``Any`` keeps this a valid
+        # override without coupling to that private module.
+        return super().get_command(ctx, _COMMAND_ALIASES.get(cmd_name, cmd_name))
+
+
 app = typer.Typer(
     name="mikrot",
-    help="MikroTik RouterOS REST helper CLI.",
+    help=(
+        "AI-friendly CLI for automating MikroTik (RouterOS) over the REST API "
+        "- scriptable by humans, CI, and AI agents."
+    ),
     epilog=_ROOT_EPILOG,
     no_args_is_help=True,
     add_completion=False,
     rich_markup_mode="rich",
+    cls=AliasGroup,
 )
 
 doctor_cmd.register(app)

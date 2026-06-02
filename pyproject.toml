@@ -1,7 +1,7 @@
 [project]
 name = "mikrot"
 version = "0.1.0"
-description = "MikroTik RouterOS REST helper CLI (mikrot)."
+description = "AI-friendly CLI for automating MikroTik (RouterOS) over the REST API - scriptable by humans, CI, and AI agents."
 authors = [
     { name = "Sergey Grankin" },
 ]

@@ -53,10 +53,11 @@ def _lease_matches(
 def register(app: typer.Typer) -> None:
     @app.command(
         "dhcp-leases",
-        help="List DHCP server leases (/ip/dhcp-server/lease) with optional filters.",
+        help="List DHCP server leases (/ip/dhcp-server/lease) with optional filters. Aliases: l, d.",
         epilog=(
-            "Examples: `mikrot dhcp-leases`, `mikrot dhcp-leases --mac DC:2C:6E` "
-            "(filter by vendor OUI), `mikrot dhcp-leases --comment printer`, "
+            "Examples: `mikrot dhcp-leases`, `mikrot l --status bound` (alias), "
+            "`mikrot dhcp-leases --mac DC:2C:6E` (filter by vendor OUI), "
+            "`mikrot dhcp-leases --comment printer`, "
             "`mikrot --json dhcp-leases --status bound`."
         ),
     )
