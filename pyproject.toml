@@ -51,6 +51,11 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "RUF"]
 
+[tool.ruff.lint.flake8-bugbear]
+# Typer declares CLI params via calls in argument defaults; this is the
+# intended pattern, so they are not B008 violations.
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
 [tool.pyright]
 # Point Pylance / pyright at the project's uv-managed venv so editor imports
 # (typer, httpx, ...) resolve without manual interpreter setup.

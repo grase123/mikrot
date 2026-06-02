@@ -33,26 +33,36 @@ def _normalize_mac(value: str) -> str:
 def _lease_matches(
     lease: dict[str, Any],
     *,
-    mac: str | None,
-    name: str | None,
-    status: str | None,
-    comment: str | None,
-    address: str | None,
+    mac: list[str],
+    name: list[str],
+    status: list[str],
+    comment: list[str],
+    address: list[str],
 ) -> bool:
-    """Pure filter for a single lease (substring filters are case-insensitive)."""
-    if mac and _normalize_mac(mac) not in _normalize_mac(str(lease.get("mac-address", ""))):
+    """Pure filter for a single lease.
+
+    Each option is a list of values: a lease matches an option if it matches ANY
+    of its values (OR); options are combined with AND; an empty list means the
+    option is not applied. Substring matches are case-insensitive.
+    """
+    if mac:
+        lease_mac = _normalize_mac(str(lease.get("mac-address", "")))
+        if not any(_normalize_mac(value) in lease_mac for value in mac):
+            return False
+    if name:
+        host = str(lease.get("host-name", "")).lower()
+        if not any(value.lower() in host for value in name):
+            return False
+    if status and str(lease.get("status", "")) not in status:
         return False
-    if name and name.lower() not in str(lease.get("host-name", "")).lower():
-        return False
-    if status and status != str(lease.get("status", "")):
-        return False
-    if comment and comment.lower() not in str(lease.get("comment", "")).lower():
-        return False
+    if comment:
+        text = str(lease.get("comment", "")).lower()
+        if not any(value.lower() in text for value in comment):
+            return False
     if address:
-        needle = address.lower()
-        in_address = needle in str(lease.get("address", "")).lower()
-        in_active = needle in str(lease.get("active-address", "")).lower()
-        if not (in_address or in_active):
+        addr = str(lease.get("address", "")).lower()
+        active = str(lease.get("active-address", "")).lower()
+        if not any(value.lower() in addr or value.lower() in active for value in address):
             return False
     return True
 
@@ -62,41 +72,41 @@ def register(app: typer.Typer) -> None:
         "dhcp-leases",
         help="List DHCP server leases (/ip/dhcp-server/lease) with optional filters. Aliases: l, d.",
         epilog=(
-            "Examples: `mikrot dhcp-leases`, `mikrot l --status bound` (alias), "
-            "`mikrot dhcp-leases --mac DC:2C:6E` (filter by vendor OUI), "
-            "`mikrot dhcp-leases --comment printer`, "
-            "`mikrot dhcp-leases -a 192.168.88` (IP substring), "
-            "`mikrot --json dhcp-leases --status bound`."
+            "Filters are repeatable: OR within an option, AND across options. "
+            "Examples: `mikrot l`, `mikrot l -a 10.0.0.5 -a 10.0.0.7` (any of several IPs), "
+            "`mikrot dhcp-leases -s bound -s waiting`, "
+            "`mikrot dhcp-leases --mac DC:2C:6E` (vendor OUI), "
+            "`mikrot --json dhcp-leases --comment printer`."
         ),
     )
     def dhcp_leases(
         ctx: typer.Context,
-        mac: str | None = typer.Option(
-            None,
+        mac: list[str] = typer.Option(
+            [],
             "--mac",
             "-m",
-            help="Filter by MAC substring; ':'/'-'/no separator all match (case-insensitive).",
+            help="Filter by MAC substring; repeatable (OR). ':'/'-'/no separator all match.",
         ),
-        name: str | None = typer.Option(
-            None,
+        name: list[str] = typer.Option(
+            [],
             "--name",
             "--host",
             "-n",
-            help="Filter by host-name substring (case-insensitive).",
+            help="Filter by host-name substring; repeatable (OR).",
         ),
-        status: str | None = typer.Option(
-            None, "--status", "-s", help="Filter by exact lease status (e.g. bound, waiting)."
+        status: list[str] = typer.Option(
+            [], "--status", "-s", help="Filter by exact lease status; repeatable (OR)."
         ),
-        comment: str | None = typer.Option(
-            None, "--comment", "-c", help="Filter by comment substring (case-insensitive)."
+        comment: list[str] = typer.Option(
+            [], "--comment", "-c", help="Filter by comment substring; repeatable (OR)."
         ),
-        address: str | None = typer.Option(
-            None,
+        address: list[str] = typer.Option(
+            [],
             "--address",
             "--ip",
             "-a",
             "-i",
-            help="Filter by IP substring; matches address or active-address.",
+            help="Filter by IP substring; repeatable (OR). Matches address or active-address.",
         ),
     ) -> None:
         with emit_errors(ctx) as cli_ctx:

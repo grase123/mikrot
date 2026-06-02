@@ -16,7 +16,7 @@ provided in a **lightweight** form.
 | Command | Purpose |
 | --- | --- |
 | `mikrot doctor` | Connection diagnostics (ok/warn/fail + `overall_status`) + baseline router info (identity / resource / routerboard). |
-| `mikrot dhcp-leases` | List DHCP leases (`/ip/dhcp-server/lease`) with `--mac` (= `-m`) / `--name` (= `--host`/`-n`) / `--status` (= `-s`) / `--comment` (= `-c`) / `--address` (= `--ip`/`-a`/`-i`) filters. Aliases: `l`, `d`. |
+| `mikrot dhcp-leases` | List DHCP leases (`/ip/dhcp-server/lease`) with `--mac` (= `-m`) / `--name` (= `--host`/`-n`) / `--status` (= `-s`) / `--comment` (= `-c`) / `--address` (= `--ip`/`-a`/`-i`) filters (repeatable: OR within an option). Aliases: `l`, `d`. |
 | `mikrot make-static <ip>` | Convert a dynamic lease into a static reservation (dry-run by default; `--commit` applies). |
 | `mikrot make-dynamic <ip>` | The reverse operation via `DELETE` (dry-run by default; `--commit` applies). |
 | `mikrot manifest` | Machine-readable self-description of the CLI for AI (`--json`). |
@@ -146,6 +146,7 @@ mikrot l --status bound                  # alias for dhcp-leases (also `d`)
 mikrot dhcp-leases --mac DC:2C:6E        # MAC substring; ':' / '-' / no separator all match (e.g. vendor OUI)
 mikrot dhcp-leases --comment printer     # filter by comment substring
 mikrot dhcp-leases -a 192.168.88.50      # IP substring (matches address or active-address)
+mikrot l -a 10.0.0.5 -a 10.0.0.7         # repeat an option: match ANY of several IPs (OR)
 mikrot dhcp-leases --status bound        # online clients only
 mikrot --json dhcp-leases                # full lease (~19 fields) per record
 

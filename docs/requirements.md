@@ -67,8 +67,10 @@ separator-insensitive -- `:`/`-`/none all match), host-name substring via `--nam
   dimmed.
 - `--json`: an array of the **full** lease objects (~19 fields), not the column subset.
 
-The MAC substring filter is handy for grouping devices by vendor prefix (OUI). Command
-aliases: `l`, `d` (resolved by `AliasGroup`; see DEC-013).
+The MAC substring filter is handy for grouping devices by vendor prefix (OUI). Every filter
+is repeatable: a lease matches an option if it matches **any** of that option's values (OR);
+options are combined with **AND**. Command aliases: `l`, `d` (resolved by `AliasGroup`; see
+DEC-013).
 
 ### 3.3. `mikrot make-static <ip> [--commit]`
 
