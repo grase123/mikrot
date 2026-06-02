@@ -1,8 +1,14 @@
 # mikrot
 
-A CLI for managing a **MikroTik** router over its **REST API** (RouterOS 7.1+).
-A standalone, single-package tool. Stack: Python 3.12, UV, Typer, Rich, httpx,
-Pydantic. The project is **small and simple**, so the AI-friendly features are
+mikrot is a small, cross-platform Python CLI for managing MikroTik (RouterOS) routers
+through their REST API. It is built to be automation- and **AI-friendly**: every command
+speaks `--json`, errors come back as structured data (stable codes with machine-actionable
+fixes), and `mikrot manifest` publishes a machine-readable self-description (commands,
+response shapes, error and exit codes). That lets scripts, CI pipelines, and AI agents
+drive it reliably -- while it stays an ergonomic CLI for people.
+
+Standalone, single-package tool (RouterOS 7.1+). Stack: Python 3.12, UV, Typer, Rich,
+httpx, Pydantic. The project is **small and simple**, so the AI-friendly features are
 provided in a **lightweight** form.
 
 ## What it does
@@ -19,12 +25,12 @@ provided in a **lightweight** form.
 
 ```pwsh
 # Production install (CLI into the OS home):
-uv tool install <repo-or-url>
+uv tool install git+https://github.com/grase123/mikrot
 uv tool update-shell                 # once; then restart the terminal
 mikrot --version
 
 # Dev (from the repository):
-git clone <repo-url> mikrot
+git clone https://github.com/grase123/mikrot.git
 cd mikrot
 uv sync --extra dev                  # venv for tests/lint and `uv run`
 uv run mikrot --version

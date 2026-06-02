@@ -20,6 +20,10 @@ dependencies = [
     "expandvars>=1.1.2",
 ]
 
+[project.urls]
+Homepage = "https://github.com/grase123/mikrot"
+Repository = "https://github.com/grase123/mikrot"
+
 [project.scripts]
 mikrot = "mikrot.app:main"
 
