@@ -272,11 +272,46 @@ and [`docs/decisions.md`](docs/decisions.md).
 
 ## Development
 
+Dev and CI commands are defined as [Taskfile](https://taskfile.dev) targets, so the
+pipeline is decoupled from any specific CI provider and local and CI runs stay identical.
+Install go-task first:
+
 ```pwsh
-uv sync --extra dev          # dependencies
-uv run pytest                # tests (no live router: httpx mocked)
-uv run ruff check .          # lint
-uv run mypy src              # types
+# Windows (PowerShell)
+winget install Task.Task
+```
+
+```bash
+# macOS (Homebrew)
+brew install go-task/tap/go-task
+
+# Linux
+curl -sL https://taskfile.dev/install.sh | sh
+```
+
+See the [go-task install docs](https://taskfile.dev/installation/) for alternatives. Then
+use the targets (`task --list` shows them all):
+
+```pwsh
+task setup           # install dependencies (incl. dev extras)
+task ci              # full gate: lint + types + test
+task test            # run the test suite (no live router: httpx mocked)
+task lint            # ruff check
+task format          # ruff format (use `task format:check` to verify only)
+task types           # mypy src
+task build           # build the wheel and sdist
+task run -- doctor   # run the CLI with args (here: a live check against .env)
+```
+
+go-task runs commands through a built-in POSIX sh interpreter on every OS, so the targets
+work the same on Windows, macOS, and Linux. Each target just wraps the underlying `uv`
+command, so you can run them directly without go-task if you prefer:
+
+```pwsh
+uv sync --extra dev          # = task setup
+uv run pytest                # = task test
+uv run ruff check .          # = task lint
+uv run mypy src              # = task types
 uv run mikrot doctor         # live check against the router from .env
 ```
 

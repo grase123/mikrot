@@ -57,11 +57,15 @@ and `infrastructure_errors`. Source -- [`src/mikrot/commands/manifest.py`](src/m
 
 ## Useful commands
 
+Dev/CI commands are wrapped as `Taskfile.yml` targets (`task setup` / `task ci` /
+`task test` / `task lint` / `task types` / `task format` / `task build`; `task --list`
+for all). CI should call a target, not duplicate the `uv` commands below.
+
 ```pwsh
-uv sync --extra dev          # dependencies (including dev)
-uv run pytest                # tests (no live router)
-uv run ruff check .          # lint
-uv run mypy src              # types
+uv sync --extra dev          # = task setup
+uv run pytest                # = task test
+uv run ruff check .          # = task lint
+uv run mypy src              # = task types
 uv run mikrot doctor         # live check against the router from .env
 uv run mikrot --json manifest
 ```

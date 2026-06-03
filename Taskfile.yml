@@ -1,0 +1,65 @@
+# Taskfile for mikrot -- single source of truth for dev/CI commands.
+#
+# Run `task --list` to see the available targets. CI/CD should invoke a target
+# (e.g. `task ci`) instead of duplicating the underlying `uv` commands, so the
+# pipeline stays decoupled from any specific CI provider and local and CI runs
+# stay identical.
+#
+# go-task executes commands through a built-in POSIX sh interpreter on every OS
+# (Windows / macOS / Linux), so these targets need no shell-specific branching.
+version: '3'
+
+silent: true
+
+tasks:
+  default:
+    desc: List the available tasks
+    cmds:
+      - task --list
+
+  setup:
+    desc: Install dependencies (including dev extras)
+    cmds:
+      - uv sync --extra dev
+
+  lint:
+    desc: Lint with ruff
+    cmds:
+      - uv run ruff check .
+
+  format:
+    desc: Format the code with ruff
+    cmds:
+      - uv run ruff format .
+
+  format:check:
+    desc: Check formatting without writing changes
+    cmds:
+      - uv run ruff format --check .
+
+  types:
+    desc: Type-check with mypy
+    cmds:
+      - uv run mypy src
+
+  test:
+    desc: Run the test suite (no live router; httpx mocked)
+    cmds:
+      - uv run pytest
+
+  build:
+    desc: Build the wheel and sdist
+    cmds:
+      - uv build
+
+  run:
+    desc: 'Run the CLI with args: task run -- <args>'
+    cmds:
+      - uv run mikrot {{.CLI_ARGS}}
+
+  ci:
+    desc: Full CI gate (lint + types + test)
+    cmds:
+      - task: lint
+      - task: types
+      - task: test
