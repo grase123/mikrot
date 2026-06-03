@@ -23,6 +23,23 @@ provided in a **lightweight** form.
 
 ## Installation
 
+mikrot is built and run with [UV](https://docs.astral.sh/uv/). Install UV first (it is the
+only prerequisite -- it manages the Python toolchain itself):
+
+```pwsh
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+```bash
+# macOS / Linux (bash/zsh)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Restart the terminal afterwards so `uv` is on `PATH`. See the
+[UV install docs](https://docs.astral.sh/uv/getting-started/installation/) for alternatives
+(Homebrew, pipx, standalone installers). Then install mikrot:
+
 ```pwsh
 # Production install (CLI into the OS home):
 uv tool install git+https://github.com/grase123/mikrot
@@ -47,7 +64,13 @@ mikrot finds the nearest `.env` by walking up from the current directory. Create
 `.env` once:
 
 ```pwsh
+# Windows (PowerShell)
 Copy-Item .env.example .env          # then set MIKROT_PASSWORD
+```
+
+```bash
+# macOS / Linux (bash/zsh)
+cp .env.example .env                 # then set MIKROT_PASSWORD
 ```
 
 Any `mikrot` run from inside the cloned repo (or a subdirectory) then uses that `.env` --
@@ -105,10 +128,29 @@ Only `MIKROT_PASSWORD` is required -- set it in any of the layers above. Every
 other variable is optional: leave it out to use the default. `mikrot doctor`
 reports if `MIKROT_PASSWORD` is not set.
 
+To set a variable directly in the shell (precedence layer 1, beats both `.env`
+files) for the current session:
+
+```pwsh
+# Windows (PowerShell)
+$env:MIKROT_PASSWORD = "secret"
+```
+
+```bash
+# macOS / Linux (bash/zsh)
+export MIKROT_PASSWORD=secret
+```
+
 To start from a template, copy the repo's example into a project-local `.env`:
 
 ```pwsh
+# Windows (PowerShell)
 Copy-Item .env.example .env          # then set MIKROT_PASSWORD
+```
+
+```bash
+# macOS / Linux (bash/zsh)
+cp .env.example .env                 # then set MIKROT_PASSWORD
 ```
 
 ### Secrets from 1Password (`op://` references)
@@ -155,7 +197,8 @@ mikrot make-static 192.168.88.50 --commit      # apply
 mikrot make-dynamic 192.168.88.50 --commit     # reverse (via DELETE)
 ```
 
-> Tip against a wide Rich table being truncated: `$env:COLUMNS=250`.
+> Tip against a wide Rich table being truncated: set `COLUMNS` wider --
+> `$env:COLUMNS=250` (PowerShell) or `export COLUMNS=250` (bash/zsh).
 
 ## JSON output (`--json`) -- for AI/scripts
 
